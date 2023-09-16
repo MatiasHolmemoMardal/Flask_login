@@ -7,14 +7,24 @@ from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
+import json
 
 app = Flask("Google Login App")
 app.secret_key = "secret key" #TODO make new secret-key
 
+def get_google_client_id(client_secrets_file):
+    if os.path.exists(client_secrets_file):
+        with open(client_secrets_file, 'r') as file:
+            json_data = json.load(file)
+        return json_data.get('web', {}).get('client_id', '') #TODO Make sure the handle for the Google client id is correct.
+    else:
+        print(f"The file {client_secrets_file} does not exist.")
+        return ''
+
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1" #TODO Remove line. This is only included so that this test-application can run ass http, and not https
 
-GOOGLE_CLIENT_ID = "" #TODO paste client_id from the client_secret.json file (Check readMe for how to make file)
 client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret.json") #TODO create client_secret.json (Check readMe for how to make file)
+GOOGLE_CLIENT_ID = get_google_client_id(client_secrets_file) 
 
 flow = Flow.from_client_secrets_file(
     client_secrets_file=client_secrets_file,
